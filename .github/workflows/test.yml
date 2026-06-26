@@ -7,6 +7,7 @@ on:
 permissions:
   pull-requests: write
   contents: read
+  manage_billing:copilot: write
 
 jobs:
   ai-code-review:
@@ -24,5 +25,5 @@ jobs:
           gh_pat: ${{ secrets.GITHUB_TOKEN }}
           repo: ${{ github.repository }}
           pr_number: ${{ github.event.pull_request.number }}
-          api_key: ${{ secrets.COPILOG_API_KEY }}
+          api_key: ${{ secrets.COPILOT_API_KEY }}
           language: Thai

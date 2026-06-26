@@ -114,7 +114,8 @@ if ((0, config_1.requiresApiUrl)(PROVIDER) && !process.env.INPUT_API_URL && !pro
 }
 // EXPLICIT_API_KEY is the raw api_key input (personal PAT or provider key)
 // For Copilot, api_key should be a personal GitHub PAT with Copilot subscription
-const EXPLICIT_API_KEY = process.env.INPUT_API_KEY ?? process.env.API_KEY;
+// Use || (not ??) so empty strings (from unset GitHub Actions secrets) fall through
+const EXPLICIT_API_KEY = process.env.INPUT_API_KEY || process.env.API_KEY || undefined;
 let API_KEY = EXPLICIT_API_KEY ?? GH_PAT ?? "";
 function fetchJson(url, options, body) {
     return new Promise((resolve, reject) => {
