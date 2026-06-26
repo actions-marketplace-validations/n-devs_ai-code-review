@@ -1,4 +1,13 @@
 import * as https from "https";
+import {
+  type ApiType,
+  type Provider,
+  resolveApiType,
+  resolveApiUrl,
+  isCopilotUrl,
+  isAzureProvider,
+  requiresApiUrl,
+} from "./config";
 
 // ดึงค่าจาก Environment Variables (รองรับทั้ง GitHub Actions inputs และ env vars ตรง)
 const GH_PAT = process.env.INPUT_GH_PAT ?? process.env.GH_PAT;
@@ -9,40 +18,14 @@ const MAX_DIFF_CHARS = parseInt(process.env.INPUT_MAX_DIFF_CHARS ?? process.env.
 const MAX_TOKENS = parseInt(process.env.INPUT_MAX_TOKENS ?? process.env.MAX_TOKENS ?? "4096", 10);
 const LANGUAGE = process.env.INPUT_LANGUAGE ?? process.env.LANGUAGE ?? "English";
 
-type ApiType = "chat" | "responses" | "messages" | "text";
-type Provider = "copilot" | "openai" | "anthropic" | "openrouter" | "ollama" | "xai" | "zai" | "google" | "azure" | "aws" | "custom";
-
-const API_TYPE_PATHS: Record<ApiType, string> = {
-  chat: "/chat/completions",
-  responses: "/responses",
-  messages: "/messages",
-  text: "/completions",
-};
-
-const PROVIDER_BASES: Partial<Record<Provider, string>> = {
-  copilot: "https://api.githubcopilot.com",
-  openai: "https://api.openai.com/v1",
-  anthropic: "https://api.anthropic.com/v1",
-  openrouter: "https://openrouter.ai/api/v1",
-  ollama: "http://localhost:11434/v1",
-  xai: "https://api.x.ai/v1",
-  zai: "https://api.z.ai/api/coding/paas/v4",
-  google: "https://generativelanguage.googleapis.com/v1beta/openai",
-  // azure: URL is resource-specific — use api_url
-  // aws:   URL is region-specific  — use api_url
-  // custom: must provide api_url
-};
-
-const PROVIDER_DEFAULT_TYPE: Partial<Record<Provider, ApiType>> = {
-  anthropic: "messages",
-};
-
 const PROVIDER = (process.env.INPUT_PROVIDER ?? process.env.PROVIDER) as Provider | undefined;
-const API_TYPE = (process.env.INPUT_API_TYPE ?? process.env.INPUT_COMPLETION_TYPE ?? process.env.API_TYPE ?? process.env.COMPLETION_TYPE ?? (PROVIDER && PROVIDER_DEFAULT_TYPE[PROVIDER]) ?? "chat") as ApiType;
-const API_BASE = ((PROVIDER && PROVIDER_BASES[PROVIDER]) ?? "https://api.githubcopilot.com").replace(/\/$/, "");
-const API_URL = process.env.INPUT_API_URL ?? process.env.API_URL ?? (API_BASE + API_TYPE_PATHS[API_TYPE]);
+const API_TYPE: ApiType = resolveApiType(
+  PROVIDER,
+  process.env.INPUT_API_TYPE ?? process.env.INPUT_COMPLETION_TYPE ?? process.env.API_TYPE ?? process.env.COMPLETION_TYPE
+);
+const API_URL = resolveApiUrl(PROVIDER, API_TYPE, process.env.INPUT_API_URL ?? process.env.API_URL);
 
-if (["custom", "azure", "aws"].includes(PROVIDER ?? "") && !process.env.INPUT_API_URL && !process.env.API_URL) {
+if (requiresApiUrl(PROVIDER) && !process.env.INPUT_API_URL && !process.env.API_URL) {
   console.error(`api_url is required when provider is '${PROVIDER}'.`);
   process.exit(1);
 }
@@ -179,12 +162,12 @@ async function askOpenAICompat(systemPrompt: string, userPrompt: string): Promis
   };
 
   // Azure uses api-key header instead of Bearer
-  if (PROVIDER === "azure" || API_URL.includes(".openai.azure.com")) {
+  if (isAzureProvider(PROVIDER, API_URL)) {
     delete (headers as Record<string, unknown>)["Authorization"];
     headers["api-key"] = API_KEY;
   }
 
-  if (API_URL.includes("githubcopilot.com")) {
+  if (isCopilotUrl(API_URL)) {
     headers["editor-version"] = "vscode/1.95.0";
     headers["editor-plugin-version"] = "copilot-chat/0.22.0";
     headers["openai-organization"] = "github-copilot";
