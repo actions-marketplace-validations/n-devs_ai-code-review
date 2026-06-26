@@ -13,7 +13,7 @@ import {
 const GH_PAT = process.env.INPUT_GH_PAT ?? process.env.GH_PAT;
 const PR_NUMBER = process.env.INPUT_PR_NUMBER ?? process.env.PR_NUMBER;
 const REPO = process.env.INPUT_REPO ?? process.env.REPO; // format: owner/repo
-const MODEL = process.env.INPUT_MODEL ?? process.env.INPUT_COPILOT_MODEL ?? process.env.MODEL ?? process.env.COPILOT_MODEL ?? "gpt-5-mini";
+const MODEL = process.env.INPUT_MODEL ?? process.env.INPUT_COPILOT_MODEL ?? process.env.MODEL ?? process.env.COPILOT_MODEL ?? "gpt-4o";
 const MAX_DIFF_CHARS = parseInt(process.env.INPUT_MAX_DIFF_CHARS ?? process.env.MAX_DIFF_CHARS ?? "30000", 10);
 const MAX_TOKENS = parseInt(process.env.INPUT_MAX_TOKENS ?? process.env.MAX_TOKENS ?? "4096", 10);
 const LANGUAGE = process.env.INPUT_LANGUAGE ?? process.env.LANGUAGE ?? "English";
