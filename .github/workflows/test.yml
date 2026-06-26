@@ -7,7 +7,6 @@ on:
 permissions:
   pull-requests: write
   contents: read
-  manage_billing:copilot: write
 
 jobs:
   ai-code-review:
