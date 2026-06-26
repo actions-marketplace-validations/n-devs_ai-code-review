@@ -21,6 +21,7 @@ exports.API_TYPE_PATHS = {
 };
 exports.PROVIDER_BASES = {
     copilot: "https://api.githubcopilot.com",
+    "github-models": "https://models.inference.ai.azure.com",
     openai: "https://api.openai.com/v1",
     anthropic: "https://api.anthropic.com/v1",
     openrouter: "https://openrouter.ai/api/v1",

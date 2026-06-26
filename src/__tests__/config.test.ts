@@ -55,6 +55,9 @@ describe("PROVIDER_BASES", () => {
       "https://generativelanguage.googleapis.com/v1beta/openai"
     );
   });
+  it("github-models base URL", () => {
+    expect(PROVIDER_BASES["github-models"]).toBe("https://models.inference.ai.azure.com");
+  });
   it("azure/aws/custom have no base URL", () => {
     expect(PROVIDER_BASES.azure).toBeUndefined();
     expect(PROVIDER_BASES.aws).toBeUndefined();
@@ -120,6 +123,11 @@ describe("resolveApiUrl", () => {
       "https://openrouter.ai/api/v1/responses"
     );
   });
+  it("constructs GitHub Models chat URL", () => {
+    expect(resolveApiUrl("github-models", "chat")).toBe(
+      "https://models.inference.ai.azure.com/chat/completions"
+    );
+  });
   it("uses override URL when provided, ignoring provider+type", () => {
     expect(
       resolveApiUrl("custom", "chat", "https://my-proxy.internal/v1/chat/completions")
@@ -144,6 +152,9 @@ describe("isCopilotUrl", () => {
   });
   it("returns false for non-Copilot URL", () => {
     expect(isCopilotUrl("https://api.openai.com/v1/chat/completions")).toBe(false);
+  });
+  it("returns false for GitHub Models URL", () => {
+    expect(isCopilotUrl("https://models.inference.ai.azure.com/chat/completions")).toBe(false);
   });
 });
 

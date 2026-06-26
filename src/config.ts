@@ -1,6 +1,7 @@
 export type ApiType = "chat" | "responses" | "messages" | "text";
 export type Provider =
   | "copilot"
+  | "github-models"
   | "openai"
   | "anthropic"
   | "openrouter"
@@ -21,6 +22,7 @@ export const API_TYPE_PATHS: Record<ApiType, string> = {
 
 export const PROVIDER_BASES: Partial<Record<Provider, string>> = {
   copilot: "https://api.githubcopilot.com",
+  "github-models": "https://models.inference.ai.azure.com",
   openai: "https://api.openai.com/v1",
   anthropic: "https://api.anthropic.com/v1",
   openrouter: "https://openrouter.ai/api/v1",
