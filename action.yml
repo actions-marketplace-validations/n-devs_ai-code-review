@@ -37,7 +37,7 @@ inputs:
   max_tokens:
     description: "Maximum number of tokens in the AI response"
     required: false
-    default: "2048"
+    default: "4096"
   max_diff_chars:
     description: "Maximum number of characters of diff to send to Copilot"
     required: false
