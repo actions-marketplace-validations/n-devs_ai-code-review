@@ -17,6 +17,7 @@ const MODEL = process.env.INPUT_MODEL ?? process.env.INPUT_COPILOT_MODEL ?? proc
 const MAX_DIFF_CHARS = parseInt(process.env.INPUT_MAX_DIFF_CHARS ?? process.env.MAX_DIFF_CHARS ?? "30000", 10);
 const MAX_TOKENS = parseInt(process.env.INPUT_MAX_TOKENS ?? process.env.MAX_TOKENS ?? "4096", 10);
 const LANGUAGE = process.env.INPUT_LANGUAGE ?? process.env.LANGUAGE ?? "English";
+const TITLE = process.env.INPUT_TITLE ?? process.env.TITLE ?? "AI Code Review";
 
 const PROVIDER = (process.env.INPUT_PROVIDER ?? process.env.PROVIDER) as Provider | undefined;
 const API_TYPE: ApiType = resolveApiType(
@@ -29,7 +30,7 @@ if (requiresApiUrl(PROVIDER) && !process.env.INPUT_API_URL && !process.env.API_U
   console.error(`api_url is required when provider is '${PROVIDER}'.`);
   process.exit(1);
 }
-const API_KEY = process.env.INPUT_API_KEY ?? process.env.API_KEY ?? GH_PAT ?? "";
+let API_KEY = process.env.INPUT_API_KEY ?? process.env.API_KEY ?? GH_PAT ?? "";
 
 interface GitHubFile {
   filename: string;
@@ -267,8 +268,9 @@ async function askResponses(systemPrompt: string, userPrompt: string): Promise<s
 // 3. โพสต์คำตอบกลับลงใน GitHub PR
 async function postCommentToPr(message: string): Promise<void> {
   const url = `https://api.github.com/repos/${REPO}/issues/${PR_NUMBER}/comments`;
+  const provider = PROVIDER ?? "copilot";
   const payload = JSON.stringify({
-    body: `## 🤖 GitHub Copilot Code Review Bot\n\n${message}`,
+    body: `## ${TITLE} — \`${MODEL}\` via \`${provider}\`\n\n${message}`,
   });
 
   const options: https.RequestOptions = {
@@ -292,6 +294,24 @@ async function postCommentToPr(message: string): Promise<void> {
 }
 
 // --- Main Execution ---
+async function getCopilotToken(ghPat: string): Promise<string> {
+  const url = "https://api.github.com/copilot_internal/v2/token";
+  const options: https.RequestOptions = {
+    method: "GET",
+    headers: {
+      Authorization: `token ${ghPat}`,
+      Accept: "application/json",
+      "User-Agent": "ai-code-review",
+    },
+  };
+  const { status, data, text } = await fetchJson<{ token?: string }>(url, options);
+  if (status !== 200 || !data.token) {
+    throw new Error(`Failed to get Copilot token: ${status} ${text.slice(0, 200)}`);
+  }
+  console.log("Copilot token obtained.");
+  return data.token;
+}
+
 async function main(): Promise<void> {
   if (!GH_PAT || !PR_NUMBER || !REPO) {
     console.error("Missing required environment variables. Set GH_PAT, PR_NUMBER, REPO.");
@@ -299,6 +319,13 @@ async function main(): Promise<void> {
   }
 
   console.log("Fetching PR diff...");
+
+  // Exchange PAT for Copilot session token when using Copilot API
+  if (isCopilotUrl(API_URL) && GH_PAT && !process.env.INPUT_API_KEY && !process.env.API_KEY) {
+    console.log("Exchanging GitHub PAT for Copilot session token...");
+    API_KEY = await getCopilotToken(GH_PAT);
+  }
+
   const diff = await getPrDiff();
 
   if (!diff) {

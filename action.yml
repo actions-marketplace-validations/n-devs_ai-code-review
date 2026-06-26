@@ -12,6 +12,10 @@ inputs:
   pr_number:
     description: "Pull request number to review"
     required: true
+  title:
+    description: "Title for the code review comment"
+    required: false
+    default: "AI Code Review"
   model:
     description: "AI model to use (e.g. gpt-4o, claude-3-5-sonnet-20241022, llama3)"
     required: false
