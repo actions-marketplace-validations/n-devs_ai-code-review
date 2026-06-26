@@ -29,3 +29,5 @@ jobs:
           model: gpt-4o
           api_key: ${{ secrets.GITHUB_TOKEN }}
           language: Thai
+          max_tokens: 2048
+          max_diff_chars: 10000
