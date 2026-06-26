@@ -1,5 +1,5 @@
-name: "AI Code Review"
-description: "Automated PR code review using GitHub Copilot"
+name: "AI Code Review by n-devs"
+description: "Automated PR code review powered by GitHub Models, Copilot, OpenAI, Anthropic, and more"
 author: "ai-code-review"
 
 inputs:
