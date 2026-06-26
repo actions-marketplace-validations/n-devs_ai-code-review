@@ -12,17 +12,21 @@ inputs:
   pr_number:
     description: "Pull request number to review"
     required: true
+  api_key:
+    description: "API key for the selected provider. For copilot: provide a personal GitHub PAT with Copilot subscription (GITHUB_TOKEN will not work — it lacks Copilot access)"
+    required: true
+  title:
+    description: "Title for the code review comment"
+    required: false
+    default: "AI Code Review"
   model:
     description: "AI model to use (e.g. gpt-4o, claude-3-5-sonnet-20241022, llama3)"
     required: false
-    default: "gpt-5-mini"
+    default: "gpt-4o"
   provider:
-    description: "AI provider shorthand: copilot, openai, anthropic, openrouter, ollama, xai, zai, google, azure, aws, custom — sets api_url and api_type defaults automatically (azure/aws require api_url)"
+    description: "AI provider shorthand: copilot, github-models, openai, anthropic, openrouter, ollama, xai, zai, google, azure, aws, custom — sets api_url and api_type defaults automatically (azure/aws require api_url). Use github-models to authenticate with GITHUB_TOKEN without needing a personal PAT."
     required: false
-    default: "copilot"
-  api_key:
-    description: "API key for the selected provider (not needed for copilot — uses gh_pat)"
-    required: false
+    default: "github-models"
   api_url:
     description: "Full API endpoint URL (e.g. https://api.anthropic.com/v1/messages). Overrides provider + api_type defaults when set."
     required: false
@@ -37,12 +41,12 @@ inputs:
   max_diff_chars:
     description: "Maximum number of characters of diff to send to Copilot"
     required: false
-    default: "30000"
+    default: "10000"
   language:
     description: "Language for the code review response (e.g. English, Thai, Japanese)"
     required: false
     default: "English"
 
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"

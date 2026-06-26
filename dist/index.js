@@ -2,6 +2,61 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 973:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.REQUIRES_API_URL = exports.PROVIDER_DEFAULT_TYPE = exports.PROVIDER_BASES = exports.API_TYPE_PATHS = void 0;
+exports.resolveApiType = resolveApiType;
+exports.resolveApiUrl = resolveApiUrl;
+exports.isCopilotUrl = isCopilotUrl;
+exports.isAzureProvider = isAzureProvider;
+exports.requiresApiUrl = requiresApiUrl;
+exports.API_TYPE_PATHS = {
+    chat: "/chat/completions",
+    responses: "/responses",
+    messages: "/messages",
+    text: "/completions",
+};
+exports.PROVIDER_BASES = {
+    "github-models": "https://models.inference.ai.azure.com",
+    copilot: "https://api.githubcopilot.com",
+    openai: "https://api.openai.com/v1",
+    anthropic: "https://api.anthropic.com/v1",
+    openrouter: "https://openrouter.ai/api/v1",
+    ollama: "http://localhost:11434/v1",
+    xai: "https://api.x.ai/v1",
+    zai: "https://api.z.ai/api/coding/paas/v4",
+    google: "https://generativelanguage.googleapis.com/v1beta/openai",
+    // azure/aws/custom: must provide api_url
+};
+exports.PROVIDER_DEFAULT_TYPE = {
+    anthropic: "messages",
+};
+exports.REQUIRES_API_URL = ["custom", "azure", "aws"];
+function resolveApiType(provider, envApiType) {
+    return (envApiType ?? (provider && exports.PROVIDER_DEFAULT_TYPE[provider]) ?? "chat");
+}
+function resolveApiUrl(provider, apiType, override) {
+    if (override)
+        return override;
+    const base = ((provider && exports.PROVIDER_BASES[provider]) ?? "https://api.githubcopilot.com").replace(/\/$/, "");
+    return base + exports.API_TYPE_PATHS[apiType];
+}
+function isCopilotUrl(url) {
+    return url.includes("githubcopilot.com");
+}
+function isAzureProvider(provider, url) {
+    return provider === "azure" || url.includes(".openai.azure.com");
+}
+function requiresApiUrl(provider) {
+    return exports.REQUIRES_API_URL.includes(provider);
+}
+
+
+/***/ }),
+
 /***/ 407:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -41,45 +96,28 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const https = __importStar(__nccwpck_require__(692));
+const config_1 = __nccwpck_require__(973);
 // ดึงค่าจาก Environment Variables (รองรับทั้ง GitHub Actions inputs และ env vars ตรง)
 const GH_PAT = process.env.INPUT_GH_PAT ?? process.env.GH_PAT;
 const PR_NUMBER = process.env.INPUT_PR_NUMBER ?? process.env.PR_NUMBER;
 const REPO = process.env.INPUT_REPO ?? process.env.REPO; // format: owner/repo
-const MODEL = process.env.INPUT_MODEL ?? process.env.INPUT_COPILOT_MODEL ?? process.env.MODEL ?? process.env.COPILOT_MODEL ?? "gpt-5-mini";
+const MODEL = process.env.INPUT_MODEL ?? process.env.INPUT_COPILOT_MODEL ?? process.env.MODEL ?? process.env.COPILOT_MODEL ?? "gpt-4o";
 const MAX_DIFF_CHARS = parseInt(process.env.INPUT_MAX_DIFF_CHARS ?? process.env.MAX_DIFF_CHARS ?? "30000", 10);
 const MAX_TOKENS = parseInt(process.env.INPUT_MAX_TOKENS ?? process.env.MAX_TOKENS ?? "4096", 10);
 const LANGUAGE = process.env.INPUT_LANGUAGE ?? process.env.LANGUAGE ?? "English";
-const API_TYPE_PATHS = {
-    chat: "/chat/completions",
-    responses: "/responses",
-    messages: "/messages",
-    text: "/completions",
-};
-const PROVIDER_BASES = {
-    copilot: "https://api.githubcopilot.com",
-    openai: "https://api.openai.com/v1",
-    anthropic: "https://api.anthropic.com/v1",
-    openrouter: "https://openrouter.ai/api/v1",
-    ollama: "http://localhost:11434/v1",
-    xai: "https://api.x.ai/v1",
-    zai: "https://api.z.ai/api/coding/paas/v4",
-    google: "https://generativelanguage.googleapis.com/v1beta/openai",
-    // azure: URL is resource-specific — use api_url
-    // aws:   URL is region-specific  — use api_url
-    // custom: must provide api_url
-};
-const PROVIDER_DEFAULT_TYPE = {
-    anthropic: "messages",
-};
+const TITLE = process.env.INPUT_TITLE ?? process.env.TITLE ?? "AI Code Review";
 const PROVIDER = (process.env.INPUT_PROVIDER ?? process.env.PROVIDER);
-const API_TYPE = (process.env.INPUT_API_TYPE ?? process.env.INPUT_COMPLETION_TYPE ?? process.env.API_TYPE ?? process.env.COMPLETION_TYPE ?? (PROVIDER && PROVIDER_DEFAULT_TYPE[PROVIDER]) ?? "chat");
-const API_BASE = ((PROVIDER && PROVIDER_BASES[PROVIDER]) ?? "https://api.githubcopilot.com").replace(/\/$/, "");
-const API_URL = process.env.INPUT_API_URL ?? process.env.API_URL ?? (API_BASE + API_TYPE_PATHS[API_TYPE]);
-if (["custom", "azure", "aws"].includes(PROVIDER ?? "") && !process.env.INPUT_API_URL && !process.env.API_URL) {
+const API_TYPE = (0, config_1.resolveApiType)(PROVIDER, process.env.INPUT_API_TYPE ?? process.env.INPUT_COMPLETION_TYPE ?? process.env.API_TYPE ?? process.env.COMPLETION_TYPE);
+const API_URL = (0, config_1.resolveApiUrl)(PROVIDER, API_TYPE, process.env.INPUT_API_URL ?? process.env.API_URL);
+if ((0, config_1.requiresApiUrl)(PROVIDER) && !process.env.INPUT_API_URL && !process.env.API_URL) {
     console.error(`api_url is required when provider is '${PROVIDER}'.`);
     process.exit(1);
 }
-const API_KEY = process.env.INPUT_API_KEY ?? process.env.API_KEY ?? GH_PAT ?? "";
+// EXPLICIT_API_KEY is the raw api_key input (personal PAT or provider key)
+// For Copilot, api_key should be a personal GitHub PAT with Copilot subscription
+// Use || (not ??) so empty strings (from unset GitHub Actions secrets) fall through
+const EXPLICIT_API_KEY = process.env.INPUT_API_KEY || process.env.API_KEY || undefined;
+let API_KEY = EXPLICIT_API_KEY ?? GH_PAT ?? "";
 function fetchJson(url, options, body) {
     return new Promise((resolve, reject) => {
         const req = https.request(url, options, (res) => {
@@ -171,11 +209,11 @@ async function askOpenAICompat(systemPrompt, userPrompt) {
         "User-Agent": "ai-code-review",
     };
     // Azure uses api-key header instead of Bearer
-    if (PROVIDER === "azure" || API_URL.includes(".openai.azure.com")) {
+    if ((0, config_1.isAzureProvider)(PROVIDER, API_URL)) {
         delete headers["Authorization"];
         headers["api-key"] = API_KEY;
     }
-    if (API_URL.includes("githubcopilot.com")) {
+    if ((0, config_1.isCopilotUrl)(API_URL)) {
         headers["editor-version"] = "vscode/1.95.0";
         headers["editor-plugin-version"] = "copilot-chat/0.22.0";
         headers["openai-organization"] = "github-copilot";
@@ -258,8 +296,9 @@ async function askResponses(systemPrompt, userPrompt) {
 // 3. โพสต์คำตอบกลับลงใน GitHub PR
 async function postCommentToPr(message) {
     const url = `https://api.github.com/repos/${REPO}/issues/${PR_NUMBER}/comments`;
+    const provider = PROVIDER ?? "copilot";
     const payload = JSON.stringify({
-        body: `## 🤖 GitHub Copilot Code Review Bot\n\n${message}`,
+        body: `## ${TITLE} — \`${MODEL}\` via \`${provider}\`\n\n${message}`,
     });
     const options = {
         method: "POST",
@@ -280,12 +319,41 @@ async function postCommentToPr(message) {
     }
 }
 // --- Main Execution ---
+async function getCopilotToken(ghPat) {
+    const url = "https://api.github.com/copilot_internal/v2/token";
+    const options = {
+        method: "GET",
+        headers: {
+            Authorization: `token ${ghPat}`,
+            Accept: "application/json",
+            "User-Agent": "ai-code-review",
+        },
+    };
+    const { status, data, text } = await fetchJson(url, options);
+    if (status !== 200 || !data.token) {
+        throw new Error(`Failed to get Copilot token: ${status} ${text.slice(0, 200)}`);
+    }
+    console.log("Copilot token obtained.");
+    return data.token;
+}
 async function main() {
     if (!GH_PAT || !PR_NUMBER || !REPO) {
         console.error("Missing required environment variables. Set GH_PAT, PR_NUMBER, REPO.");
         process.exit(1);
     }
     console.log("Fetching PR diff...");
+    // Exchange PAT for Copilot session token when using Copilot API.
+    // Uses api_key (personal PAT with Copilot subscription) if provided,
+    // otherwise falls back to gh_pat. Note: GITHUB_TOKEN will fail here — use a personal PAT.
+    if ((0, config_1.isCopilotUrl)(API_URL)) {
+        const patForExchange = EXPLICIT_API_KEY ?? GH_PAT ?? "";
+        if (!patForExchange) {
+            console.error("Copilot requires a GitHub personal PAT with Copilot subscription. Set api_key (preferred) or gh_pat.");
+            process.exit(1);
+        }
+        console.log("Exchanging GitHub PAT for Copilot session token...");
+        API_KEY = await getCopilotToken(patForExchange);
+    }
     const diff = await getPrDiff();
     if (!diff) {
         console.log("No diff found or diff is too large.");
