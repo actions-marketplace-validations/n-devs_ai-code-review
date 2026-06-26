@@ -1,0 +1,48 @@
+name: "AI Code Review"
+description: "Automated PR code review using GitHub Copilot"
+author: "ai-code-review"
+
+inputs:
+  gh_pat:
+    description: "GitHub Personal Access Token with Copilot access"
+    required: true
+  repo:
+    description: "Repository in owner/repo format"
+    required: true
+  pr_number:
+    description: "Pull request number to review"
+    required: true
+  model:
+    description: "AI model to use (e.g. gpt-4o, claude-3-5-sonnet-20241022, llama3)"
+    required: false
+    default: "gpt-5-mini"
+  provider:
+    description: "AI provider shorthand: copilot, openai, anthropic, openrouter, ollama, xai, zai, google, azure, aws, custom — sets api_url and api_type defaults automatically (azure/aws require api_url)"
+    required: false
+    default: "copilot"
+  api_key:
+    description: "API key for the selected provider (not needed for copilot — uses gh_pat)"
+    required: false
+  api_url:
+    description: "Full API endpoint URL (e.g. https://api.anthropic.com/v1/messages). Overrides provider + api_type defaults when set."
+    required: false
+  api_type:
+    description: "API type: 'chat' (Chat Completions), 'responses' (OpenAI Responses API), or 'messages' (Anthropic Messages API)"
+    required: false
+    default: "chat"
+  max_tokens:
+    description: "Maximum number of tokens in the AI response"
+    required: false
+    default: "4096"
+  max_diff_chars:
+    description: "Maximum number of characters of diff to send to Copilot"
+    required: false
+    default: "30000"
+  language:
+    description: "Language for the code review response (e.g. English, Thai, Japanese)"
+    required: false
+    default: "English"
+
+runs:
+  using: "node20"
+  main: "dist/index.js"

@@ -1,0 +1,27 @@
+name: Test AI Code Review Action
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  ai-code-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build action
+        run: npm ci && npm run build
+
+      - name: Run AI Code Review
+        uses: ./
+        with:
+          gh_pat: ${{ secrets.GITHUB_TOKEN }}
+          repo: ${{ github.repository }}
+          pr_number: ${{ github.event.pull_request.number }}
+          language: Thai
