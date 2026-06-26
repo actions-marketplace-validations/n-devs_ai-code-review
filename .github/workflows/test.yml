@@ -25,8 +25,6 @@ jobs:
           gh_pat: ${{ secrets.GITHUB_TOKEN }}
           repo: ${{ github.repository }}
           pr_number: ${{ github.event.pull_request.number }}
-          provider: github-models
-          model: gpt-4o
           api_key: ${{ secrets.GITHUB_TOKEN }}
           language: Thai
           max_tokens: 2048
