@@ -22,7 +22,7 @@ inputs:
   model:
     description: "AI model to use (e.g. gpt-4o, claude-3-5-sonnet-20241022, llama3)"
     required: false
-    default: "gpt-5-mini"
+    default: "gpt-4o"
   provider:
     description: "AI provider shorthand: copilot, github-models, openai, anthropic, openrouter, ollama, xai, zai, google, azure, aws, custom — sets api_url and api_type defaults automatically (azure/aws require api_url). Use github-models to authenticate with GITHUB_TOKEN without needing a personal PAT."
     required: false
