@@ -25,7 +25,7 @@ inputs:
     required: false
     default: "copilot"
   api_key:
-    description: "API key for the selected provider (not needed for copilot — uses gh_pat)"
+    description: "API key for the selected provider. For copilot: provide a personal GitHub PAT with Copilot subscription (GITHUB_TOKEN will not work — it lacks Copilot access)"
     required: false
   api_url:
     description: "Full API endpoint URL (e.g. https://api.anthropic.com/v1/messages). Overrides provider + api_type defaults when set."
@@ -48,5 +48,5 @@ inputs:
     default: "English"
 
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"

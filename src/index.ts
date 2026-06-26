@@ -30,7 +30,10 @@ if (requiresApiUrl(PROVIDER) && !process.env.INPUT_API_URL && !process.env.API_U
   console.error(`api_url is required when provider is '${PROVIDER}'.`);
   process.exit(1);
 }
-let API_KEY = process.env.INPUT_API_KEY ?? process.env.API_KEY ?? GH_PAT ?? "";
+// EXPLICIT_API_KEY is the raw api_key input (personal PAT or provider key)
+// For Copilot, api_key should be a personal GitHub PAT with Copilot subscription
+const EXPLICIT_API_KEY = process.env.INPUT_API_KEY ?? process.env.API_KEY;
+let API_KEY = EXPLICIT_API_KEY ?? GH_PAT ?? "";
 
 interface GitHubFile {
   filename: string;
@@ -320,10 +323,17 @@ async function main(): Promise<void> {
 
   console.log("Fetching PR diff...");
 
-  // Exchange PAT for Copilot session token when using Copilot API
-  if (isCopilotUrl(API_URL) && GH_PAT && !process.env.INPUT_API_KEY && !process.env.API_KEY) {
+  // Exchange PAT for Copilot session token when using Copilot API.
+  // Uses api_key (personal PAT with Copilot subscription) if provided,
+  // otherwise falls back to gh_pat. Note: GITHUB_TOKEN will fail here — use a personal PAT.
+  if (isCopilotUrl(API_URL)) {
+    const patForExchange = EXPLICIT_API_KEY ?? GH_PAT ?? "";
+    if (!patForExchange) {
+      console.error("Copilot requires a GitHub personal PAT with Copilot subscription. Set api_key (preferred) or gh_pat.");
+      process.exit(1);
+    }
     console.log("Exchanging GitHub PAT for Copilot session token...");
-    API_KEY = await getCopilotToken(GH_PAT);
+    API_KEY = await getCopilotToken(patForExchange);
   }
 
   const diff = await getPrDiff();
