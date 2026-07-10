@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: n-devs/ai-code-review@v1
+      - uses: n-devs/ai-code-review@v2
         with:
           gh_pat: ${{ secrets.GITHUB_TOKEN }}
           repo: ${{ github.repository }}
@@ -38,8 +38,8 @@ jobs:
 | `repo` | ✅ | — | Repository in `owner/repo` format |
 | `pr_number` | ✅ | — | Pull request number to review |
 | `api_key` | ✅ | — | API key for the provider. For `github-models`: use `GITHUB_TOKEN`. For `copilot`: use a personal PAT with Copilot subscription |
-| `provider` | | `github-models` | AI provider shorthand (see [Providers](#providers)) |
-| `model` | | `openai/gpt-4o-mini` | Model name |
+| `provider` | | `github-azure-models` | AI provider shorthand (see [Providers](#providers)) |
+| `model` | | `gpt-4o` | Model name (see [Providers](#providers) for naming convention per provider) |
 | `title` | | `AI Code Review` | Title shown in the PR comment header |
 | `api_url` | | — | Full endpoint URL — overrides provider + api_type defaults |
 | `api_type` | | `chat` | API format: `chat`, `responses`, or `messages` |
@@ -49,22 +49,29 @@ jobs:
 
 ## Providers
 
-| `provider` | `api_type` default | Base URL | Auth |
-|---|---|---|---|
-| `github-models` | `chat` | `https://models.inference.ai.azure.com` | `GITHUB_TOKEN` ✅ |
-| `copilot` | `chat` | `https://api.githubcopilot.com` | Personal PAT with Copilot subscription |
-| `openai` | `chat` | `https://api.openai.com/v1` | API key |
-| `anthropic` | `messages` | `https://api.anthropic.com/v1` | API key |
-| `openrouter` | `chat` | `https://openrouter.ai/api/v1` | API key |
-| `ollama` | `chat` | `http://localhost:11434/v1` | — |
-| `xai` | `chat` | `https://api.x.ai/v1` | API key (Grok) |
-| `zai` | `chat` | `https://api.z.ai/api/coding/paas/v4` | API key (GLM) |
-| `google` | `chat` | `https://generativelanguage.googleapis.com/v1beta/openai` | API key |
-| `azure` | `chat` | ⚠️ requires `api_url` | `api-key` header |
-| `aws` | `chat` | ⚠️ requires `api_url` | API key |
-| `custom` | `chat` | ⚠️ requires `api_url` | API key |
+| `provider` | `api_type` default | Base URL | Auth | Model naming |
+|---|---|---|---|---|
+| `github-azure-models` (default) | `chat` | `https://models.inference.ai.azure.com` | `GITHUB_TOKEN` ✅ | Plain name, e.g. `gpt-4o` |
+| `github-models` | `chat` | `https://models.github.ai/inference` | `GITHUB_TOKEN` ✅ | Publisher-prefixed, e.g. `openai/gpt-4o-mini` |
+| `copilot` | `chat` | `https://api.githubcopilot.com` | Personal PAT with Copilot subscription | Plain name, e.g. `gpt-4o` |
+| `openai` | `chat` | `https://api.openai.com/v1` | API key | Plain name, e.g. `gpt-4o` |
+| `anthropic` | `messages` | `https://api.anthropic.com/v1` | API key | e.g. `claude-3-5-sonnet-20241022` |
+| `openrouter` | `chat` | `https://openrouter.ai/api/v1` | API key | e.g. `meta-llama/llama-3.3-70b-instruct` |
+| `ollama` | `chat` | `http://localhost:11434/v1` | — | e.g. `llama3` |
+| `xai` | `chat` | `https://api.x.ai/v1` | API key (Grok) | e.g. `grok-3` |
+| `zai` | `chat` | `https://api.z.ai/api/coding/paas/v4` | API key (GLM) | provider-specific |
+| `google` | `chat` | `https://generativelanguage.googleapis.com/v1beta/openai` | API key | e.g. `gemini-2.0-flash` |
+| `azure` | `chat` | ⚠️ requires `api_url` | `api-key` header | your deployment name |
+| `aws` | `chat` | ⚠️ requires `api_url` | API key | provider-specific |
+| `custom` | `chat` | ⚠️ requires `api_url` | API key | provider-specific |
 
-> **Note:** `copilot` provider exchanges a personal PAT for a short-lived session token automatically. `GITHUB_TOKEN` from GitHub Actions will not work for Copilot — use `github-models` instead for zero-config setups.
+> **Note:** `copilot` provider exchanges a personal PAT for a short-lived session token automatically. `GITHUB_TOKEN` from GitHub Actions will not work for Copilot — use `github-azure-models`/`github-models` instead for zero-config setups.
+>
+> **GitHub Models has two provider shorthands:**
+> - `github-azure-models` (default) uses the legacy `models.inference.ai.azure.com` endpoint with plain model names (`gpt-4o`).
+> - `github-models` uses the current `models.github.ai/inference` endpoint documented in [GitHub's Quickstart](https://docs.github.com/en/github-models/quickstart), which requires publisher-prefixed model names (`openai/gpt-4o-mini`, `openai/gpt-5-mini`, etc.).
+>
+> If `github-azure-models` ever stops responding, switch to `provider: github-models` with a publisher-prefixed `model`.
 
 ## API Types
 
@@ -80,7 +87,7 @@ jobs:
 ### GitHub Models (default — zero config)
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -88,12 +95,25 @@ jobs:
     api_key: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+### GitHub Models (current endpoint, publisher-prefixed model)
+
+```yaml
+- uses: n-devs/ai-code-review@v2
+  with:
+    gh_pat: ${{ secrets.GITHUB_TOKEN }}
+    repo: ${{ github.repository }}
+    pr_number: ${{ github.event.pull_request.number }}
+    provider: github-models
+    api_key: ${{ secrets.GITHUB_TOKEN }}
+    model: openai/gpt-4o-mini
+```
+
 ### GitHub Copilot
 
 > Requires a personal PAT with Copilot subscription stored as `COPILOT_PAT` secret.
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -106,7 +126,7 @@ jobs:
 ### OpenAI GPT-4o
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -119,7 +139,7 @@ jobs:
 ### Anthropic Claude
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -133,7 +153,7 @@ jobs:
 ### Google Gemini
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -146,7 +166,7 @@ jobs:
 ### xAI Grok
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -159,7 +179,7 @@ jobs:
 ### OpenRouter
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -172,7 +192,7 @@ jobs:
 ### Ollama (self-hosted)
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -186,7 +206,7 @@ jobs:
 ### Azure OpenAI
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -200,7 +220,7 @@ jobs:
 ### OpenAI Responses API
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -214,7 +234,7 @@ jobs:
 ### Custom Provider
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -228,7 +248,7 @@ jobs:
 ### Review in Thai
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
