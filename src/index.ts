@@ -7,7 +7,11 @@ import {
   isCopilotUrl,
   isAzureProvider,
   requiresApiUrl,
+  isGithubModelsProvider,
+  PROVIDER_BASES,
 } from "./config";
+import ModelClient, { isUnexpected } from "@azure-rest/ai-inference";
+import { AzureKeyCredential } from "@azure/core-auth";
 
 // ดึงค่าจาก Environment Variables (รองรับทั้ง GitHub Actions inputs และ env vars ตรง)
 const GH_PAT = process.env.INPUT_GH_PAT ?? process.env.GH_PAT;
@@ -130,6 +134,9 @@ async function askAI(diffText: string): Promise<string> {
   const systemPrompt = `You are an expert Code Reviewer. Review the code and respond in ${LANGUAGE}.`;
   const userPrompt = `Please review the following code diff and suggest improvements. Also point out any security vulnerabilities if present. Respond in ${LANGUAGE}.\n\n${diffText}`;
   console.log(`Using api_type: ${API_TYPE} (${API_URL})`);
+  if (isGithubModelsProvider(PROVIDER, API_URL) && API_TYPE === "chat") {
+    return askGitHubModels(systemPrompt, userPrompt);
+  }
   if (API_TYPE === "chat" || API_TYPE === "text") {
     return askOpenAICompat(systemPrompt, userPrompt);
   }
@@ -140,6 +147,33 @@ async function askAI(diffText: string): Promise<string> {
     return askResponses(systemPrompt, userPrompt);
   }
   return askOpenAICompat(systemPrompt, userPrompt);
+}
+
+// 2b. GitHub Models — ใช้ @azure-rest/ai-inference SDK อย่างเป็นทางการ
+async function askGitHubModels(systemPrompt: string, userPrompt: string): Promise<string> {
+  const endpoint = PROVIDER_BASES["github-models"]!;
+  const token = GH_PAT ?? API_KEY;
+  const client = ModelClient(endpoint, new AzureKeyCredential(token));
+
+  const response = await client.path("/chat/completions").post({
+    body: {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+    },
+  });
+
+  if (isUnexpected(response)) {
+    const errText = JSON.stringify(response.body.error ?? response.body);
+    console.error(`GitHub Models API error: ${response.status}`);
+    console.error(`Response: ${errText.slice(0, 500)}`);
+    return `⚠️ GitHub Models API returned status ${response.status}. Response: ${errText.slice(0, 200)}`;
+  }
+
+  return response.body.choices?.[0]?.message?.content ?? "";
 }
 
 async function askOpenAICompat(systemPrompt: string, userPrompt: string): Promise<string> {

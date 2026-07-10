@@ -21,7 +21,7 @@ export const API_TYPE_PATHS: Record<ApiType, string> = {
 };
 
 export const PROVIDER_BASES: Partial<Record<Provider, string>> = {
-    "github-models": "https://models.inference.ai.azure.com",
+    "github-models": "https://models.github.ai/inference",
   copilot: "https://api.githubcopilot.com",
   openai: "https://api.openai.com/v1",
   anthropic: "https://api.anthropic.com/v1",
@@ -65,6 +65,10 @@ export function isCopilotUrl(url: string): boolean {
 
 export function isAzureProvider(provider: Provider | undefined, url: string): boolean {
   return provider === "azure" || url.includes(".openai.azure.com");
+}
+
+export function isGithubModelsProvider(provider: Provider | undefined, url: string): boolean {
+  return provider === "github-models" || url.includes(".inference.ai.azure.com");
 }
 
 export function requiresApiUrl(provider: Provider | undefined): boolean {
