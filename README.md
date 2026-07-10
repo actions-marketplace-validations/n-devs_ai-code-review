@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: n-devs/ai-code-review@v1
+      - uses: n-devs/ai-code-review@v2
         with:
           gh_pat: ${{ secrets.GITHUB_TOKEN }}
           repo: ${{ github.repository }}
@@ -87,7 +87,7 @@ jobs:
 ### GitHub Models (default — zero config)
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -98,7 +98,7 @@ jobs:
 ### GitHub Models (current endpoint, publisher-prefixed model)
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -113,7 +113,7 @@ jobs:
 > Requires a personal PAT with Copilot subscription stored as `COPILOT_PAT` secret.
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -126,7 +126,7 @@ jobs:
 ### OpenAI GPT-4o
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -139,7 +139,7 @@ jobs:
 ### Anthropic Claude
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -153,7 +153,7 @@ jobs:
 ### Google Gemini
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -166,7 +166,7 @@ jobs:
 ### xAI Grok
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -179,7 +179,7 @@ jobs:
 ### OpenRouter
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -192,7 +192,7 @@ jobs:
 ### Ollama (self-hosted)
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -206,7 +206,7 @@ jobs:
 ### Azure OpenAI
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -220,7 +220,7 @@ jobs:
 ### OpenAI Responses API
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -234,7 +234,7 @@ jobs:
 ### Custom Provider
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
@@ -248,7 +248,7 @@ jobs:
 ### Review in Thai
 
 ```yaml
-- uses: n-devs/ai-code-review@v1
+- uses: n-devs/ai-code-review@v2
   with:
     gh_pat: ${{ secrets.GITHUB_TOKEN }}
     repo: ${{ github.repository }}
