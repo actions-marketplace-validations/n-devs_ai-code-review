@@ -51,7 +51,7 @@ jobs:
 
 | `provider` | `api_type` default | Base URL | Auth |
 |---|---|---|---|
-| `github-models` | `chat` | `https://models.github.ai/inference` | `GITHUB_TOKEN` ✅ |
+| `github-models` | `chat` | `https://models.inference.ai.azure.com` | `GITHUB_TOKEN` ✅ |
 | `copilot` | `chat` | `https://api.githubcopilot.com` | Personal PAT with Copilot subscription |
 | `openai` | `chat` | `https://api.openai.com/v1` | API key |
 | `anthropic` | `messages` | `https://api.anthropic.com/v1` | API key |

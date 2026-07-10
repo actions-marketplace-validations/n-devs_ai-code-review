@@ -21,7 +21,7 @@ export const API_TYPE_PATHS: Record<ApiType, string> = {
 };
 
 export const PROVIDER_BASES: Partial<Record<Provider, string>> = {
-    "github-models": "https://models.github.ai/inference",
+    "github-models": "https://models.inference.ai.azure.com",
   copilot: "https://api.githubcopilot.com",
   openai: "https://api.openai.com/v1",
   anthropic: "https://api.anthropic.com/v1",
