@@ -2400,7 +2400,7 @@ async function askAI(diffText) {
 }
 // 2b. GitHub Models — ใช้ @azure-rest/ai-inference SDK อย่างเป็นทางการ
 async function askGitHubModels(systemPrompt, userPrompt) {
-    const endpoint = config_1.PROVIDER_BASES["github-models"];
+    const endpoint = API_URL.replace(/\/chat\/completions\/?$/, "");
     const token = GH_PAT ?? API_KEY;
     const client = (0, ai_inference_1.default)(endpoint, new core_auth_1.AzureKeyCredential(token));
     const response = await client.path("/chat/completions").post({

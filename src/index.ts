@@ -8,7 +8,6 @@ import {
   isAzureProvider,
   requiresApiUrl,
   isGithubModelsProvider,
-  PROVIDER_BASES,
 } from "./config";
 import ModelClient, { isUnexpected } from "@azure-rest/ai-inference";
 import { AzureKeyCredential } from "@azure/core-auth";
@@ -151,7 +150,7 @@ async function askAI(diffText: string): Promise<string> {
 
 // 2b. GitHub Models — ใช้ @azure-rest/ai-inference SDK อย่างเป็นทางการ
 async function askGitHubModels(systemPrompt: string, userPrompt: string): Promise<string> {
-  const endpoint = PROVIDER_BASES["github-models"]!;
+  const endpoint = API_URL.replace(/\/chat\/completions\/?$/, "");
   const token = GH_PAT ?? API_KEY;
   const client = ModelClient(endpoint, new AzureKeyCredential(token));
 
