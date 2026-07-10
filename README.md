@@ -39,7 +39,7 @@ jobs:
 | `pr_number` | ✅ | — | Pull request number to review |
 | `api_key` | ✅ | — | API key for the provider. For `github-models`: use `GITHUB_TOKEN`. For `copilot`: use a personal PAT with Copilot subscription |
 | `provider` | | `github-models` | AI provider shorthand (see [Providers](#providers)) |
-| `model` | | `gpt-4o` | Model name |
+| `model` | | `openai/gpt-4o-mini` | Model name |
 | `title` | | `AI Code Review` | Title shown in the PR comment header |
 | `api_url` | | — | Full endpoint URL — overrides provider + api_type defaults |
 | `api_type` | | `chat` | API format: `chat`, `responses`, or `messages` |
@@ -51,7 +51,7 @@ jobs:
 
 | `provider` | `api_type` default | Base URL | Auth |
 |---|---|---|---|
-| `github-models` | `chat` | `https://models.inference.ai.azure.com` | `GITHUB_TOKEN` ✅ |
+| `github-models` | `chat` | `https://models.github.ai/inference` | `GITHUB_TOKEN` ✅ |
 | `copilot` | `chat` | `https://api.githubcopilot.com` | Personal PAT with Copilot subscription |
 | `openai` | `chat` | `https://api.openai.com/v1` | API key |
 | `anthropic` | `messages` | `https://api.anthropic.com/v1` | API key |
