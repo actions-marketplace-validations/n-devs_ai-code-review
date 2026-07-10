@@ -20,9 +20,9 @@ inputs:
     required: false
     default: "AI Code Review"
   model:
-    description: "AI model to use (e.g. gpt-4o, claude-3-5-sonnet-20241022, llama3)"
+    description: "AI model to use (e.g. openai/gpt-4o-mini, claude-3-5-sonnet-20241022, llama3)"
     required: false
-    default: "gpt-4o"
+    default: "openai/gpt-4o-mini"
   provider:
     description: "AI provider shorthand: copilot, github-models, openai, anthropic, openrouter, ollama, xai, zai, google, azure, aws, custom — sets api_url and api_type defaults automatically (azure/aws require api_url). Use github-models to authenticate with GITHUB_TOKEN without needing a personal PAT."
     required: false
