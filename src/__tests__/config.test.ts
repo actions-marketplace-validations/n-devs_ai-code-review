@@ -56,7 +56,7 @@ describe("PROVIDER_BASES", () => {
     );
   });
   it("github-models base URL", () => {
-    expect(PROVIDER_BASES["github-models"]).toBe("https://models.inference.ai.azure.com");
+    expect(PROVIDER_BASES["github-models"]).toBe("https://models.github.ai/inference");
   });
   it("azure/aws/custom have no base URL", () => {
     expect(PROVIDER_BASES.azure).toBeUndefined();
@@ -125,7 +125,7 @@ describe("resolveApiUrl", () => {
   });
   it("constructs GitHub Models chat URL", () => {
     expect(resolveApiUrl("github-models", "chat")).toBe(
-      "https://models.inference.ai.azure.com/chat/completions"
+      "https://models.github.ai/inference/chat/completions"
     );
   });
   it("uses override URL when provided, ignoring provider+type", () => {
