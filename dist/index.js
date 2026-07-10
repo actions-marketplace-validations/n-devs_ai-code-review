@@ -2221,6 +2221,7 @@ exports.API_TYPE_PATHS = {
     text: "/completions",
 };
 exports.PROVIDER_BASES = {
+    "github-azure-models": "https://models.inference.ai.azure.com",
     "github-models": "https://models.github.ai/inference",
     copilot: "https://api.githubcopilot.com",
     openai: "https://api.openai.com/v1",

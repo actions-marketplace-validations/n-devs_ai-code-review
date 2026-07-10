@@ -22,11 +22,11 @@ inputs:
   model:
     description: "AI model to use (e.g. gpt-4o, claude-3-5-sonnet-20241022, llama3)"
     required: false
-    default: "openai/gpt-4o"
+    default: "gpt-4o"
   provider:
     description: "AI provider shorthand: copilot, github-models, openai, anthropic, openrouter, ollama, xai, zai, google, azure, aws, custom — sets api_url and api_type defaults automatically (azure/aws require api_url). Use github-models to authenticate with GITHUB_TOKEN without needing a personal PAT."
     required: false
-    default: "github-models"
+    default: "github-azure-models"
   api_url:
     description: "Full API endpoint URL (e.g. https://api.anthropic.com/v1/messages). Overrides provider + api_type defaults when set."
     required: false
